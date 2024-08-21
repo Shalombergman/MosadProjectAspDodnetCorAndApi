@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MosadApiServer.Models;
 
 namespace MosadApiServer.Data
 {
@@ -8,5 +9,8 @@ namespace MosadApiServer.Data
         {
             Database.EnsureCreated();
         }
+        public DbSet<Agent> Agents { get; set; }
+        public DbSet<Mission> Missions { get; set; }
+        public DbSet<Target> Targets { get; set; }
     }
 }
