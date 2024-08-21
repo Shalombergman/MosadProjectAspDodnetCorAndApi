@@ -8,11 +8,12 @@ namespace MosadApiServer.Models
     public class Target
     {
         [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Role { get; set; }      
-        public Location Location { get; set; }
-        public TargetStatuses Status { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public string position { get; set; }    
+        public string? photo_url { get; set; }
+        public Location location { get; set; }
+        public TargetStatuses status { get; set; }
         
     }
 }

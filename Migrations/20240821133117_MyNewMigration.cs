@@ -5,7 +5,7 @@
 namespace MosadApiServer.Migrations
 {
     /// <inheritdoc />
-    public partial class CORECTMODELS : Migration
+    public partial class MyNewMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,35 +14,35 @@ namespace MosadApiServer.Migrations
                 name: "Locations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     x = table.Column<int>(type: "int", nullable: false),
                     y = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Locations", x => x.Id);
+                    table.PrimaryKey("PK_Locations", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Agents",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nickname = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LocationId = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    nickname = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    photo_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    locationid = table.Column<int>(type: "int", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Agents", x => x.Id);
+                    table.PrimaryKey("PK_Agents", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Agents_Locations_LocationId",
-                        column: x => x.LocationId,
+                        name: "FK_Agents_Locations_locationid",
+                        column: x => x.locationid,
                         principalTable: "Locations",
-                        principalColumn: "Id",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -50,21 +50,22 @@ namespace MosadApiServer.Migrations
                 name: "Targets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LocationId = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    position = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    photo_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    locationid = table.Column<int>(type: "int", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Targets", x => x.Id);
+                    table.PrimaryKey("PK_Targets", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Targets_Locations_LocationId",
-                        column: x => x.LocationId,
+                        name: "FK_Targets_Locations_locationid",
+                        column: x => x.locationid,
                         principalTable: "Locations",
-                        principalColumn: "Id",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -72,49 +73,49 @@ namespace MosadApiServer.Migrations
                 name: "Missions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AgentId = table.Column<int>(type: "int", nullable: true),
-                    TargetId = table.Column<int>(type: "int", nullable: true),
-                    timeLeft = table.Column<double>(type: "float", nullable: false),
-                    ActualExecutionTime = table.Column<double>(type: "float", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    agentid = table.Column<int>(type: "int", nullable: true),
+                    targetid = table.Column<int>(type: "int", nullable: true),
+                    timeLeft = table.Column<double>(type: "float", nullable: true),
+                    ActualExecutionTime = table.Column<double>(type: "float", nullable: true),
                     status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Missions", x => x.Id);
+                    table.PrimaryKey("PK_Missions", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Missions_Agents_AgentId",
-                        column: x => x.AgentId,
+                        name: "FK_Missions_Agents_agentid",
+                        column: x => x.agentid,
                         principalTable: "Agents",
-                        principalColumn: "Id");
+                        principalColumn: "id");
                     table.ForeignKey(
-                        name: "FK_Missions_Targets_TargetId",
-                        column: x => x.TargetId,
+                        name: "FK_Missions_Targets_targetid",
+                        column: x => x.targetid,
                         principalTable: "Targets",
-                        principalColumn: "Id");
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Agents_LocationId",
+                name: "IX_Agents_locationid",
                 table: "Agents",
-                column: "LocationId");
+                column: "locationid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Missions_AgentId",
+                name: "IX_Missions_agentid",
                 table: "Missions",
-                column: "AgentId");
+                column: "agentid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Missions_TargetId",
+                name: "IX_Missions_targetid",
                 table: "Missions",
-                column: "TargetId");
+                column: "targetid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Targets_LocationId",
+                name: "IX_Targets_locationid",
                 table: "Targets",
-                column: "LocationId");
+                column: "locationid");
         }
 
         /// <inheritdoc />

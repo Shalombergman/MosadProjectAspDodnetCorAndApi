@@ -24,40 +24,39 @@ namespace MosadApiServer.Migrations
 
             modelBuilder.Entity("MosadApiServer.Models.Agent", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("Image")
+                    b.Property<int>("locationid")
+                        .HasColumnType("int");
+
+                    b.Property<string>("nickname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
+                    b.Property<string>("photo_url")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("status")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("id");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("locationid");
 
                     b.ToTable("Agents");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Location", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
                     b.Property<int>("x")
                         .HasColumnType("int");
@@ -65,111 +64,114 @@ namespace MosadApiServer.Migrations
                     b.Property<int>("y")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("id");
 
                     b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Mission", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<double>("ActualExecutionTime")
+                    b.Property<double?>("ActualExecutionTime")
                         .HasColumnType("float");
 
-                    b.Property<int?>("AgentId")
+                    b.Property<int?>("agentid")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TargetId")
-                        .HasColumnType("int");
 
                     b.Property<int>("status")
                         .HasColumnType("int");
 
-                    b.Property<double>("timeLeft")
+                    b.Property<int?>("targetid")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("timeLeft")
                         .HasColumnType("float");
 
-                    b.HasKey("Id");
+                    b.HasKey("id");
 
-                    b.HasIndex("AgentId");
+                    b.HasIndex("agentid");
 
-                    b.HasIndex("TargetId");
+                    b.HasIndex("targetid");
 
                     b.ToTable("Missions");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Target", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int>("LocationId")
+                    b.Property<int>("locationid")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("photo_url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("position")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("status")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("id");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("locationid");
 
                     b.ToTable("Targets");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Agent", b =>
                 {
-                    b.HasOne("MosadApiServer.Models.Location", "Location")
+                    b.HasOne("MosadApiServer.Models.Location", "location")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("locationid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
+                    b.Navigation("location");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Mission", b =>
                 {
-                    b.HasOne("MosadApiServer.Models.Agent", "Agent")
+                    b.HasOne("MosadApiServer.Models.Agent", "agent")
                         .WithMany()
-                        .HasForeignKey("AgentId");
+                        .HasForeignKey("agentid");
 
-                    b.HasOne("MosadApiServer.Models.Target", "Target")
+                    b.HasOne("MosadApiServer.Models.Target", "target")
                         .WithMany()
-                        .HasForeignKey("TargetId");
+                        .HasForeignKey("targetid");
 
-                    b.Navigation("Agent");
+                    b.Navigation("agent");
 
-                    b.Navigation("Target");
+                    b.Navigation("target");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Target", b =>
                 {
-                    b.HasOne("MosadApiServer.Models.Location", "Location")
+                    b.HasOne("MosadApiServer.Models.Location", "location")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("locationid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
+                    b.Navigation("location");
                 });
 #pragma warning restore 612, 618
         }
