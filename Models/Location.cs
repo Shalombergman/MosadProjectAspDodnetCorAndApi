@@ -1,8 +1,15 @@
-﻿namespace MosadApiServer.Models
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace MosadApiServer.Models
 {
     public class Location
     {
-        public static int x { get; set; }
-        public static int y { get; set; }
+        public int Id { get; set; }
+        [Range(1,1000)]
+        public  int x { get; set; }
+        [Range(1,1000)]
+        public  int y { get; set; }
+       
     }
 }
