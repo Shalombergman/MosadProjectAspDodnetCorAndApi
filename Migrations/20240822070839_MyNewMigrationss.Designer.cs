@@ -12,8 +12,8 @@ using MosadApiServer.Data;
 namespace MosadApiServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240821133117_MyNewMigration")]
-    partial class MyNewMigration
+    [Migration("20240822070839_MyNewMigrationss")]
+    partial class MyNewMigrationss
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,7 @@ namespace MosadApiServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int>("locationid")
+                    b.Property<int?>("locationid")
                         .HasColumnType("int");
 
                     b.Property<string>("nickname")
@@ -43,7 +43,7 @@ namespace MosadApiServer.Migrations
                     b.Property<string>("photo_url")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("status")
+                    b.Property<int?>("status")
                         .HasColumnType("int");
 
                     b.HasKey("id");
@@ -83,17 +83,17 @@ namespace MosadApiServer.Migrations
                     b.Property<double?>("ActualExecutionTime")
                         .HasColumnType("float");
 
-                    b.Property<int?>("agentid")
+                    b.Property<int?>("agentId")
                         .HasColumnType("int");
 
                     b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("status")
+                    b.Property<int?>("status")
                         .HasColumnType("int");
 
-                    b.Property<int?>("targetid")
+                    b.Property<int?>("targetId")
                         .HasColumnType("int");
 
                     b.Property<double?>("timeLeft")
@@ -101,9 +101,9 @@ namespace MosadApiServer.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("agentid");
+                    b.HasIndex("agentId");
 
-                    b.HasIndex("targetid");
+                    b.HasIndex("targetId");
 
                     b.ToTable("Missions");
                 });
@@ -116,7 +116,7 @@ namespace MosadApiServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int>("locationid")
+                    b.Property<int?>("locationid")
                         .HasColumnType("int");
 
                     b.Property<string>("name")
@@ -130,7 +130,7 @@ namespace MosadApiServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("status")
+                    b.Property<int?>("status")
                         .HasColumnType("int");
 
                     b.HasKey("id");
@@ -144,9 +144,7 @@ namespace MosadApiServer.Migrations
                 {
                     b.HasOne("MosadApiServer.Models.Location", "location")
                         .WithMany()
-                        .HasForeignKey("locationid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("locationid");
 
                     b.Navigation("location");
                 });
@@ -154,12 +152,12 @@ namespace MosadApiServer.Migrations
             modelBuilder.Entity("MosadApiServer.Models.Mission", b =>
                 {
                     b.HasOne("MosadApiServer.Models.Agent", "agent")
-                        .WithMany()
-                        .HasForeignKey("agentid");
+                        .WithMany("missions")
+                        .HasForeignKey("agentId");
 
                     b.HasOne("MosadApiServer.Models.Target", "target")
-                        .WithMany()
-                        .HasForeignKey("targetid");
+                        .WithMany("missions")
+                        .HasForeignKey("targetId");
 
                     b.Navigation("agent");
 
@@ -170,11 +168,19 @@ namespace MosadApiServer.Migrations
                 {
                     b.HasOne("MosadApiServer.Models.Location", "location")
                         .WithMany()
-                        .HasForeignKey("locationid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("locationid");
 
                     b.Navigation("location");
+                });
+
+            modelBuilder.Entity("MosadApiServer.Models.Agent", b =>
+                {
+                    b.Navigation("missions");
+                });
+
+            modelBuilder.Entity("MosadApiServer.Models.Target", b =>
+                {
+                    b.Navigation("missions");
                 });
 #pragma warning restore 612, 618
         }

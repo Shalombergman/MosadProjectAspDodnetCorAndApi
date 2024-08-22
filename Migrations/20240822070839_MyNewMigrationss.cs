@@ -5,7 +5,7 @@
 namespace MosadApiServer.Migrations
 {
     /// <inheritdoc />
-    public partial class MyNewMigration : Migration
+    public partial class MyNewMigrationss : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,8 +32,8 @@ namespace MosadApiServer.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     nickname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     photo_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    locationid = table.Column<int>(type: "int", nullable: false),
-                    status = table.Column<int>(type: "int", nullable: false)
+                    status = table.Column<int>(type: "int", nullable: true),
+                    locationid = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -42,8 +42,7 @@ namespace MosadApiServer.Migrations
                         name: "FK_Agents_Locations_locationid",
                         column: x => x.locationid,
                         principalTable: "Locations",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -55,8 +54,8 @@ namespace MosadApiServer.Migrations
                     name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     position = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     photo_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    locationid = table.Column<int>(type: "int", nullable: false),
-                    status = table.Column<int>(type: "int", nullable: false)
+                    status = table.Column<int>(type: "int", nullable: true),
+                    locationid = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -65,8 +64,7 @@ namespace MosadApiServer.Migrations
                         name: "FK_Targets_Locations_locationid",
                         column: x => x.locationid,
                         principalTable: "Locations",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -76,23 +74,23 @@ namespace MosadApiServer.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    agentid = table.Column<int>(type: "int", nullable: true),
-                    targetid = table.Column<int>(type: "int", nullable: true),
                     timeLeft = table.Column<double>(type: "float", nullable: true),
                     ActualExecutionTime = table.Column<double>(type: "float", nullable: true),
-                    status = table.Column<int>(type: "int", nullable: false)
+                    status = table.Column<int>(type: "int", nullable: true),
+                    agentId = table.Column<int>(type: "int", nullable: true),
+                    targetId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Missions", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Missions_Agents_agentid",
-                        column: x => x.agentid,
+                        name: "FK_Missions_Agents_agentId",
+                        column: x => x.agentId,
                         principalTable: "Agents",
                         principalColumn: "id");
                     table.ForeignKey(
-                        name: "FK_Missions_Targets_targetid",
-                        column: x => x.targetid,
+                        name: "FK_Missions_Targets_targetId",
+                        column: x => x.targetId,
                         principalTable: "Targets",
                         principalColumn: "id");
                 });
@@ -103,14 +101,14 @@ namespace MosadApiServer.Migrations
                 column: "locationid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Missions_agentid",
+                name: "IX_Missions_agentId",
                 table: "Missions",
-                column: "agentid");
+                column: "agentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Missions_targetid",
+                name: "IX_Missions_targetId",
                 table: "Missions",
-                column: "targetid");
+                column: "targetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Targets_locationid",
