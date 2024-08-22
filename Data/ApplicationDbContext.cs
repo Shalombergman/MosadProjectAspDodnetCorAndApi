@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using MosadApiServer.Models;
 
 namespace MosadApiServer.Data
@@ -14,6 +16,14 @@ namespace MosadApiServer.Data
         public DbSet<Target> Targets { get; set; }
         public DbSet<Location> Locations { get; set; }
 
-       
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Agent>()
+                .HasMany(e => e.targets)
+                .WithMany(e => e.agents)
+                .UsingEntity<Mission>(
+                    l => l.HasOne<Target>(e => e.target).WithMany(e => e.missions),
+                    r => r.HasOne<Agent>(e => e.agent).WithMany(e => e.missions));
+        }
     }
 }
