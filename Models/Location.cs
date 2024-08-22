@@ -7,8 +7,10 @@ namespace MosadApiServer.Models
     {
         public int id { get; set; }
         [Range(0,1000)]
+       
         public  int x { get; set; }
         [Range(0,1000)]
+       
         public  int y { get; set; }
        
     }
