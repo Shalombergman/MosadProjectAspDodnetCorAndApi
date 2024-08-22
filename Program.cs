@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MosadApiServer.Data;
+using MosadApiServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+builder.Services.AddScoped<Coordinates>();
 
 
 var app = builder.Build();

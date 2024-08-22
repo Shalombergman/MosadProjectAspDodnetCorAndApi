@@ -14,7 +14,7 @@ namespace MosadApiServer.Data
         public DbSet<Agent> Agents { get; set; }
         public DbSet<Mission> Missions { get; set; }
         public DbSet<Target> Targets { get; set; }
-        public DbSet<Location> Locations { get; set; }
+        public DbSet<Coordinates> Locations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

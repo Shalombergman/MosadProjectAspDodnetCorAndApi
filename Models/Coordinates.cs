@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MosadApiServer.Models
 {
-    public class Location
+    public class Coordinates
     {
         public int id { get; set; }
         [Range(0,1000)]
