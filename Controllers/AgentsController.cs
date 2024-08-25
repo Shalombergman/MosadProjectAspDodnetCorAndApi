@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MosadApiServer.Data;
 using MosadApiServer.Enums;
 using MosadApiServer.Models;
+using MosadApiServer.Servises;
 using MosadApiServer.Utils;
 
 
@@ -18,12 +19,16 @@ namespace MosadApiServer.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AgentsController> _logger;
         private readonly Coordinates _coordinates;
+       
         public AgentsController(ILogger<AgentsController> logger, ApplicationDbContext context, Coordinates coordinates)
         {
             this._context = context;
             this._logger = logger;
             this._coordinates = coordinates;
         }
+
+
+
         [HttpGet]
         public async Task<IActionResult> GetAllAgent()
         {
@@ -31,6 +36,8 @@ namespace MosadApiServer.Controllers
             var agents = await this._context.Agents.Include(a => a.location).ToListAsync();
             return Ok(agents);
         }
+
+
 
         [HttpPost]
         [Produces("application/json")]
@@ -44,36 +51,44 @@ namespace MosadApiServer.Controllers
                 new { success = true, agent = agent }
                 );
         }
+
+        [HttpPut("{id}/pin")]
+        public async Task<IActionResult> AgentPin(int id,[FromBody] Coordinates coordinates)
+        {
+            int status;
+            Agent agent = await this._context.Agents.FirstOrDefaultAsync(agents => agents.id == id);
+            if (agent == null)
+            {
+                status = StatusCodes.Status404NotFound;
+                return StatusCode(status, HttpUtils.Response(status, "agent not found"));
+            }
+            agent.location = await ServiceMoving.CreatPinlocation(coordinates.x, coordinates.y);
+            status = StatusCodes.Status200OK;
+            await this._context.SaveChangesAsync();
+            return StatusCode(status, HttpUtils.Response(status, new { agent = agent }));
+        }
+
+
+
+
         [HttpPut("{id}/move")]
         public async Task<IActionResult> AgentMove(int id ,Direction direction )
         {
             Direction direction1 = direction;
             int status;
-            Agent agent = await this._context.Agents.FirstOrDefaultAsync(agents => agents.id == id);
+            Agent agent = await this._context.Agents.Include(a => a.location).FirstOrDefaultAsync(agents => agents.id == id);
             if (agent == null)
             {
                 status = StatusCodes.Status404NotFound;
                 return StatusCode(status, HttpUtils.Response(status, "agent not found"));
             }
-            agent.location = await Data.LogicToMoving.Move(direction1 ,agent.location ,1,1);
+            agent.location = await ServiceMoving.Move(direction1 ,agent.location ,1,1);
             status = StatusCodes.Status200OK;
+            await this._context.SaveChangesAsync();
             return StatusCode(status, HttpUtils.Response(status, new { agent = agent }));
         }
 
-        [HttpPut("{id}/pin")]
-        public async Task<IActionResult> AgentPin(int id ,Coordinates location)
-        {
-            int status;
-            Agent agent = await this._context.Agents.FirstOrDefaultAsync(agents => agents.id == id);
-            if (agent == null)
-            {
-                status = StatusCodes.Status404NotFound;
-                return StatusCode(status, HttpUtils.Response(status, "agent not found"));
-            }
-            agent.location = await Data.LogicToMoving.CreatPinlocation(location.x, location.y);
-            status = StatusCodes.Status200OK;
-            return StatusCode(status, HttpUtils.Response(status, new { agent = agent }));
-        }
+
 
         
 

@@ -6,10 +6,10 @@ namespace MosadApiServer.Models
     public class Coordinates
     {
         public int id { get; set; }
-        [Range(0,1000)]
+        [Range(0,999)]
        
         public  int x { get; set; }
-        [Range(0,1000)]
+        [Range(0,999)]
        
         public  int y { get; set; }
        
