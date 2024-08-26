@@ -13,7 +13,7 @@ namespace MosadApiServer.Models
           public string nickname { get; set; }
           public string? photo_url { get; set; }
           public AgentStatuses? status { get; set; }
-          public Coordinates location { get; set; }
+          public Coordinates location { get; set; } 
           public List<Mission>? missions { get; } = [];
           public List<Target>? targets { get; } = [];
                           

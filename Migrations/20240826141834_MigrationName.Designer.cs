@@ -12,8 +12,8 @@ using MosadApiServer.Data;
 namespace MosadApiServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240822070839_MyNewMigrationss")]
-    partial class MyNewMigrationss
+    [Migration("20240826141834_MigrationName")]
+    partial class MigrationName
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,7 @@ namespace MosadApiServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int?>("locationid")
+                    b.Property<int>("locationid")
                         .HasColumnType("int");
 
                     b.Property<string>("nickname")
@@ -53,7 +53,7 @@ namespace MosadApiServer.Migrations
                     b.ToTable("Agents");
                 });
 
-            modelBuilder.Entity("MosadApiServer.Models.Location", b =>
+            modelBuilder.Entity("MosadApiServer.Models.Coordinates", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -87,7 +87,6 @@ namespace MosadApiServer.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("status")
@@ -116,7 +115,7 @@ namespace MosadApiServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int?>("locationid")
+                    b.Property<int>("locationid")
                         .HasColumnType("int");
 
                     b.Property<string>("name")
@@ -142,9 +141,11 @@ namespace MosadApiServer.Migrations
 
             modelBuilder.Entity("MosadApiServer.Models.Agent", b =>
                 {
-                    b.HasOne("MosadApiServer.Models.Location", "location")
+                    b.HasOne("MosadApiServer.Models.Coordinates", "location")
                         .WithMany()
-                        .HasForeignKey("locationid");
+                        .HasForeignKey("locationid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("location");
                 });
@@ -166,9 +167,11 @@ namespace MosadApiServer.Migrations
 
             modelBuilder.Entity("MosadApiServer.Models.Target", b =>
                 {
-                    b.HasOne("MosadApiServer.Models.Location", "location")
+                    b.HasOne("MosadApiServer.Models.Coordinates", "location")
                         .WithMany()
-                        .HasForeignKey("locationid");
+                        .HasForeignKey("locationid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("location");
                 });

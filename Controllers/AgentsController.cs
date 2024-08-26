@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MosadApiServer.Data;
 using MosadApiServer.Enums;
+using MosadApiServer.Interfaces;
 using MosadApiServer.Models;
 using MosadApiServer.Servises;
 using MosadApiServer.Utils;
@@ -17,14 +18,16 @@ namespace MosadApiServer.Controllers
     public class AgentsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<AgentsController> _logger;
-        private readonly Coordinates _coordinates;
-       
-        public AgentsController(ILogger<AgentsController> logger, ApplicationDbContext context, Coordinates coordinates)
+        private readonly Coordinates _coordinates = new Coordinates();
+     
+        private readonly IServiceMoving _serviceMoving;
+        private readonly ServiceMission _serviceMission;
+
+        public AgentsController(ApplicationDbContext context, ServiceMission serviceMission, IServiceMoving serviceMoving)
         {
             this._context = context;
-            this._logger = logger;
-            this._coordinates = coordinates;
+            this._serviceMission = serviceMission;
+            this._serviceMoving = serviceMoving;
         }
 
 
@@ -33,7 +36,7 @@ namespace MosadApiServer.Controllers
         public async Task<IActionResult> GetAllAgent()
         {
             int status = StatusCodes.Status200OK;
-            var agents = await this._context.Agents.Include(a => a.location).ToListAsync();
+            var agents = await this._context.Agents.Include(a=>a.location).ToListAsync();
             return Ok(agents);
         }
 
@@ -48,8 +51,10 @@ namespace MosadApiServer.Controllers
             await this._context.SaveChangesAsync();
             return StatusCode(
                 StatusCodes.Status201Created,
-                new { success = true, agent = agent }
+                new { success = true, agent = agent.id }
+
                 );
+            await this._context.SaveChangesAsync();
         }
 
         [HttpPut("{id}/pin")]
@@ -62,9 +67,10 @@ namespace MosadApiServer.Controllers
                 status = StatusCodes.Status404NotFound;
                 return StatusCode(status, HttpUtils.Response(status, "agent not found"));
             }
-            agent.location = await ServiceMoving.CreatPinlocation(coordinates.x, coordinates.y);
+            agent.location = await this._serviceMoving.CreatPinlocation(coordinates.x, coordinates.y);
             status = StatusCodes.Status200OK;
             await this._context.SaveChangesAsync();
+            await this._serviceMission.OfferedMission();
             return StatusCode(status, HttpUtils.Response(status, new { agent = agent }));
         }
 
@@ -82,10 +88,16 @@ namespace MosadApiServer.Controllers
                 status = StatusCodes.Status404NotFound;
                 return StatusCode(status, HttpUtils.Response(status, "agent not found"));
             }
-            agent.location = await ServiceMoving.Move(direction1 ,agent.location ,1,1);
+            var coordinates = agent.location; 
+            if (coordinates == null)
+            {
+                return BadRequest("Agent location is not set.");
+            }
+            agent.location = await this._serviceMoving.Move(direction1 , coordinates, 1,1);
             status = StatusCodes.Status200OK;
             await this._context.SaveChangesAsync();
-            return StatusCode(status, HttpUtils.Response(status, new { agent = agent }));
+            await this._serviceMission.OfferedMission();
+            return StatusCode(status, HttpUtils.Response(status, new { agent = agent.location }));
         }
 
 

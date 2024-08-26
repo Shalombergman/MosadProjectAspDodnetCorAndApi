@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MosadApiServer.Data;
 using MosadApiServer.Enums;
+using MosadApiServer.Interfaces;
 using MosadApiServer.Models;
 using MosadApiServer.Servises;
 using MosadApiServer.Utils;
@@ -15,43 +17,128 @@ namespace MosadApiServer.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AgentsController> _logger;
-        private readonly Coordinates _coordinates;
-        private readonly Agent _agent;
-        private readonly Target _target;
+        
+        private ServiceMission _serviceMission;
+        private readonly IServiceMoving _serviceMoving;
+        private AgentsController _agentsController;
 
-        public MissionsController(ILogger<AgentsController> logger, ApplicationDbContext context, Coordinates coordinates, Agent agent, Target target)
+        public MissionsController(ILogger<AgentsController> logger, ApplicationDbContext context,
+             ServiceMission serviceMission, IServiceMoving serviceMoving , AgentsController agentsController)
         {
             this._context = context;
             this._logger = logger;
-            this._coordinates = coordinates;
-            this._agent = agent;
-            this._target = target;
+            this._serviceMission = serviceMission;
+            this._serviceMoving = serviceMoving;
+            this._agentsController = agentsController;
         }
 
-        [HttpGet("")]
+        [HttpGet()]
         public async Task<IActionResult> GetAllMission()
         {
             int status = StatusCodes.Status200OK;
-            var agents = await this._context.Missions.Include(a => a.name).ToListAsync();
-            return Ok(agents);
+            var missions = await this._context.Missions.ToListAsync();
+            return Ok(missions);
         }
 
-        [HttpPost]
-        [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> Update(id)
+        [HttpPost("Update")]
+        public async Task<IActionResult> UpdatMissions()
         {
-
             int status;
-            _agent = ServiceMission.OfferedMission();
-            if (agent == null)
+            var missions = await this._context.Missions.Where(mission => mission.status == MissionStatuses.MITZVAHTASK).ToListAsync();
+            if (missions.Count == 0)
             {
                 status = StatusCodes.Status404NotFound;
-                return StatusCode(status, HttpUtils.Response(status, "agent not found"));
+                return StatusCode(status, HttpUtils.Response(status, "mission not found"));
             }
+
+            foreach (var mission in missions)
+            {
+                var agent = await this._context.Agents.Include(a => a.location).FirstOrDefaultAsync(agent => agent.id == mission.agentId);
+                var target = await this._context.Targets.Include(t => t.location).FirstOrDefaultAsync(target => target.id == mission.targetId);
+                var distance = await this._serviceMoving.GetDistance(agent.location, target.location);
+                if (distance == 0)
+                {
+                    target.status = TargetStatuses.ELIMINATED;
+                    agent.status = AgentStatuses.DORMANT;
+                    mission.status = MissionStatuses.ENDED;
+                }
+                agent.location = await this._serviceMoving.Move(
+                   await this._serviceMoving.GetDirectionAsync(agent.location, target.location), target.location);
+                status = StatusCodes.Status200OK;
+                await this._context.SaveChangesAsync();
+
+                return StatusCode(status, HttpUtils.Response(status, new { agent = agent.location }));
+
+            }
+            status = StatusCodes.Status200OK;
+            return StatusCode(status);
+           
         }
 
 
 
+
+        [HttpPut("{id}")]
+        [Produces("application/json")]
+        public async Task<IActionResult> PutStatusMission([FromBody] int id, MissionStatuses missionStatuses)
+        {
+            int status;
+            var mission = await this._context.Missions.FirstOrDefaultAsync(mission => mission.id == id);
+            if (mission == null)
+            {
+                status = StatusCodes.Status404NotFound;
+                return StatusCode(status, HttpUtils.Response(status, "mission not found"));
+            }
+
+            var agent = await this._context.Agents.Include(a => a.location).FirstOrDefaultAsync(agent => agent.id == mission.agentId);
+            var target = await this._context.Targets.Include(t => t.location).FirstOrDefaultAsync(target => target.id == mission.targetId);
+            var distance = await this._serviceMoving.GetDistance(agent.location, target.location);
+            if (distance > 200)
+            {
+                await this._serviceMission.OfferedMission();
+            }
+            else
+            {
+                mission.status = MissionStatuses.MITZVAHTASK;
+                agent.status = AgentStatuses.INACTIVE;
+                target.status = TargetStatuses.ISALIVE;
+                mission.timeLeft = distance / 5;
+                var missions = await this._context.Missions.ToListAsync();
+                foreach (var missione in missions)
+                {
+                    if ((missione.agentId == agent.id || missione.targetId == target.id) &&
+                        (mission.status != MissionStatuses.MITZVAHTASK))
+                    {
+                        missions.Remove(mission);
+                    }
+                }
+            }
+            status = StatusCodes.Status200OK;
+            await this._context.SaveChangesAsync();
+            return StatusCode(status, HttpUtils.Response(status, new { missions = mission }));
+
+
+        }
+
+
+
+        // double lastLocation = await ServiceMoving.GetDistance(agent.location, target.location);
+
+        //mission.ActualExecutionTime += ServiceMoving.GetDistance(lastLocation, target.location);
+
+
+        //return StatusCode(status, HttpUtils.Response(status, new { mission = mission }));
+
     }
+    
 }
+        
+               
+
+        
+        
+           
+        
+    
+
+            
