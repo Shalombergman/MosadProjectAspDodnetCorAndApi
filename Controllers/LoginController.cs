@@ -1,23 +1,37 @@
-﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MosadApiServer.Models;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using MosadApiServer.Dto;
+using MosadApiServer.Servises;
+using System.Collections.Immutable;
 
-namespace MosadApiServer.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class LoginController(JwtService jwtService) : ControllerBase
 {
-    [Route("/[controller]")]
-    [ApiController]
-    public class LoginController : ControllerBase
-    {
-        [HttpPost]
-        [Produces("Application/json")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        public IActionResult gdhfs([FromBody]LoginModel loginModel)
-        {
-            return StatusCode(
 
-                StatusCodes.Status201Created,
-                new { token = "gdsfg" }
-                );
-        }
+
+    private static readonly ImmutableList<string> allowedNames =
+    [
+        "SimulationServer", "MVCServer"
+    ];
+
+
+    
+    [HttpPost]
+    public ActionResult<string> Login([FromBody] LoginDto loginDto) =>
+        allowedNames.Contains(loginDto.Name)
+            ? Ok(jwtService.CreateToken(loginDto.Name))
+            : BadRequest();
+    
+
+    [Authorize]
+    [HttpPost("protected")]
+    public ActionResult<string> Protected()
+    {
+        return Ok("Yay!");
     }
+    
 }
+    
+

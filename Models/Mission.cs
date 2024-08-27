@@ -8,7 +8,7 @@ namespace MosadApiServer.Models
     {
         [Key]
         public int id { get; set; }
-        public string? name { get; set; } = null!;
+        public string? name { get; set; } 
         public double? timeLeft { get; set; }
         public double? ActualExecutionTime { get; set; }
         public MissionStatuses? status { get; set; }

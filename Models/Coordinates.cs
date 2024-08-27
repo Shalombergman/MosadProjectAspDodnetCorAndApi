@@ -5,6 +5,7 @@ namespace MosadApiServer.Models
 {
     public class Coordinates
     {
+        [Key]
         public int id { get; set; }
         [Range(0,999)]
        

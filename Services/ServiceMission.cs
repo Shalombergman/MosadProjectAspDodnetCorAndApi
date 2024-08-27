@@ -30,8 +30,8 @@ namespace MosadApiServer.Servises
 
             // var agentsOffered = new List<Agent>();
             // var targetsOffered = new List<Target>();
-            var agents = await this._context.Agents.Include(a => a.location).Where(a => a.status == AgentStatuses.DORMANT).ToListAsync();
-            var targets = await this._context.Targets.Include(t => t.location).Where(t => t.status == TargetStatuses.ISALIVE).ToListAsync();
+            var agents = await this._context.Agents.Include(a => a.Coordinate).Where(a => a.status == AgentStatuses.DORMANT).ToListAsync();
+            var targets = await this._context.Targets.Include(t => t.coordinate).Where(t => t.status == TargetStatuses.ISALIVE).ToListAsync();
 
             if (agents == null || targets == null)
             {
@@ -41,13 +41,13 @@ namespace MosadApiServer.Servises
             {
                 foreach (var agent in agents)
                 {
-                    if (agent.location != null)
+                    if (agent.Coordinate != null)
                     {
                         foreach (var target in targets)
                         {
-                            if (target.location != null)
+                            if (target.coordinate != null)
                             {
-                                var distance = await GetDistance(agent.location, target.location);
+                                var distance = await GetDistance(agent.Coordinate, target.coordinate);
 
                                 if (distance <= 200)
                                 {

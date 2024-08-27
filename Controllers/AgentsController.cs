@@ -1,5 +1,6 @@
 ﻿
 using System.Diagnostics.Metrics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,12 +37,12 @@ namespace MosadApiServer.Controllers
         public async Task<IActionResult> GetAllAgent()
         {
             int status = StatusCodes.Status200OK;
-            var agents = await this._context.Agents.Include(a=>a.location).ToListAsync();
+            var agents = await this._context.Agents.Include(a=>a.Coordinate).ToListAsync();
             return Ok(agents);
         }
 
 
-
+        [Authorize(Policy = "SimulationPolicy")]
         [HttpPost]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -56,7 +57,7 @@ namespace MosadApiServer.Controllers
                 );
             await this._context.SaveChangesAsync();
         }
-
+        [Authorize(Policy = "SimulationPolicy")]
         [HttpPut("{id}/pin")]
         public async Task<IActionResult> AgentPin(int id,[FromBody] Coordinates coordinates)
         {
@@ -67,7 +68,7 @@ namespace MosadApiServer.Controllers
                 status = StatusCodes.Status404NotFound;
                 return StatusCode(status, HttpUtils.Response(status, "agent not found"));
             }
-            agent.location = await this._serviceMoving.CreatPinlocation(coordinates.x, coordinates.y);
+            agent.Coordinate = await this._serviceMoving.CreatPinlocation(coordinates.x, coordinates.y);
             status = StatusCodes.Status200OK;
             await this._context.SaveChangesAsync();
             await this._serviceMission.OfferedMission();
@@ -76,28 +77,28 @@ namespace MosadApiServer.Controllers
 
 
 
-
+        [Authorize(Policy = "SimulationPolicy")]
         [HttpPut("{id}/move")]
         public async Task<IActionResult> AgentMove(int id ,Direction direction )
         {
             Direction direction1 = direction;
             int status;
-            Agent agent = await this._context.Agents.Include(a => a.location).FirstOrDefaultAsync(agents => agents.id == id);
+            Agent agent = await this._context.Agents.Include(a => a.Coordinate).FirstOrDefaultAsync(agents => agents.id == id);
             if (agent == null)
             {
                 status = StatusCodes.Status404NotFound;
                 return StatusCode(status, HttpUtils.Response(status, "agent not found"));
             }
-            var coordinates = agent.location; 
+            var coordinates = agent.Coordinate; 
             if (coordinates == null)
             {
                 return BadRequest("Agent location is not set.");
             }
-            agent.location = await this._serviceMoving.Move(direction1 , coordinates, 1,1);
+            agent.Coordinate = await this._serviceMoving.Move(direction1 , coordinates, 1,1);
             status = StatusCodes.Status200OK;
             await this._context.SaveChangesAsync();
             await this._serviceMission.OfferedMission();
-            return StatusCode(status, HttpUtils.Response(status, new { agent = agent.location }));
+            return StatusCode(status, HttpUtils.Response(status, new { agent = agent.Coordinate }));
         }
 
 

@@ -2,18 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MosadApiServer.Data;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace MosadApiServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240826141834_MigrationName")]
-    partial class MigrationName
+    [Migration("20240826174705_RecreateLocationsTablesd")]
+    partial class RecreateLocationsTablesd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,34 +21,34 @@ namespace MosadApiServer.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("MosadApiServer.Models.Agent", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
-                    b.Property<int>("locationid")
-                        .HasColumnType("int");
+                    b.Property<int>("Coordinateid")
+                        .HasColumnType("integer");
 
                     b.Property<string>("nickname")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("photo_url")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("id");
 
-                    b.HasIndex("locationid");
+                    b.HasIndex("Coordinateid");
 
                     b.ToTable("Agents");
                 });
@@ -57,46 +57,46 @@ namespace MosadApiServer.Migrations
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
                     b.Property<int>("x")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("y")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("id");
 
-                    b.ToTable("Locations");
+                    b.ToTable("Coordinates");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Mission", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
                     b.Property<double?>("ActualExecutionTime")
-                        .HasColumnType("float");
+                        .HasColumnType("double precision");
 
                     b.Property<int?>("agentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("targetId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<double?>("timeLeft")
-                        .HasColumnType("float");
+                        .HasColumnType("double precision");
 
                     b.HasKey("id");
 
@@ -111,53 +111,53 @@ namespace MosadApiServer.Migrations
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
-                    b.Property<int>("locationid")
-                        .HasColumnType("int");
+                    b.Property<int>("coordinateid")
+                        .HasColumnType("integer");
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("photo_url")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("position")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("id");
 
-                    b.HasIndex("locationid");
+                    b.HasIndex("coordinateid");
 
                     b.ToTable("Targets");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Agent", b =>
                 {
-                    b.HasOne("MosadApiServer.Models.Coordinates", "location")
+                    b.HasOne("MosadApiServer.Models.Coordinates", "Coordinate")
                         .WithMany()
-                        .HasForeignKey("locationid")
+                        .HasForeignKey("Coordinateid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("location");
+                    b.Navigation("Coordinate");
                 });
 
             modelBuilder.Entity("MosadApiServer.Models.Mission", b =>
                 {
                     b.HasOne("MosadApiServer.Models.Agent", "agent")
-                        .WithMany("missions")
+                        .WithMany()
                         .HasForeignKey("agentId");
 
                     b.HasOne("MosadApiServer.Models.Target", "target")
-                        .WithMany("missions")
+                        .WithMany()
                         .HasForeignKey("targetId");
 
                     b.Navigation("agent");
@@ -167,23 +167,13 @@ namespace MosadApiServer.Migrations
 
             modelBuilder.Entity("MosadApiServer.Models.Target", b =>
                 {
-                    b.HasOne("MosadApiServer.Models.Coordinates", "location")
+                    b.HasOne("MosadApiServer.Models.Coordinates", "coordinate")
                         .WithMany()
-                        .HasForeignKey("locationid")
+                        .HasForeignKey("coordinateid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("location");
-                });
-
-            modelBuilder.Entity("MosadApiServer.Models.Agent", b =>
-                {
-                    b.Navigation("missions");
-                });
-
-            modelBuilder.Entity("MosadApiServer.Models.Target", b =>
-                {
-                    b.Navigation("missions");
+                    b.Navigation("coordinate");
                 });
 #pragma warning restore 612, 618
         }

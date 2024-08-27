@@ -8,6 +8,8 @@ using MosadApiServer.Interfaces;
 using MosadApiServer.Models;
 using MosadApiServer.Servises;
 using MosadApiServer.Utils;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace MosadApiServer.Controllers
 {
@@ -39,6 +41,7 @@ namespace MosadApiServer.Controllers
             var missions = await this._context.Missions.ToListAsync();
             return Ok(missions);
         }
+        [Authorize(Policy = "SimulationPolicy")]
 
         [HttpPost("Update")]
         public async Task<IActionResult> UpdatMissions()
@@ -53,21 +56,28 @@ namespace MosadApiServer.Controllers
 
             foreach (var mission in missions)
             {
-                var agent = await this._context.Agents.Include(a => a.location).FirstOrDefaultAsync(agent => agent.id == mission.agentId);
-                var target = await this._context.Targets.Include(t => t.location).FirstOrDefaultAsync(target => target.id == mission.targetId);
-                var distance = await this._serviceMoving.GetDistance(agent.location, target.location);
-                if (distance == 0)
+                var agent = await this._context.Agents.Include(a => a.Coordinate).FirstOrDefaultAsync(agent => agent.id == mission.agentId);
+                var target = await this._context.Targets.Include(t => t.coordinate).FirstOrDefaultAsync(target => target.id == mission.targetId);
+                var distance = await this._serviceMoving.GetDistance(agent.Coordinate, target.coordinate);
+                if (agent.Coordinate.x == target.coordinate.x && agent.Coordinate.y == target.coordinate.y)
                 {
                     target.status = TargetStatuses.ELIMINATED;
                     agent.status = AgentStatuses.DORMANT;
                     mission.status = MissionStatuses.ENDED;
+                    status = StatusCodes.Status200OK;
+                    missions.Remove(mission);
+                    await this._context.SaveChangesAsync();
+
+                    return StatusCode(status, HttpUtils.Response(status, new { target = target.status }));
+                    
+
                 }
-                agent.location = await this._serviceMoving.Move(
-                   await this._serviceMoving.GetDirectionAsync(agent.location, target.location), target.location);
+                agent.Coordinate = await this._serviceMoving.Move(
+                   await this._serviceMoving.GetDirectionAsync(agent.Coordinate, target.coordinate), target.coordinate);
                 status = StatusCodes.Status200OK;
                 await this._context.SaveChangesAsync();
 
-                return StatusCode(status, HttpUtils.Response(status, new { agent = agent.location }));
+                return StatusCode(status, HttpUtils.Response(status, new { agent = agent.Coordinate }));
 
             }
             status = StatusCodes.Status200OK;
@@ -77,6 +87,7 @@ namespace MosadApiServer.Controllers
 
 
 
+        [Authorize(Policy = "MVCPolicy")]
 
         [HttpPut("{id}")]
         [Produces("application/json")]
@@ -90,11 +101,12 @@ namespace MosadApiServer.Controllers
                 return StatusCode(status, HttpUtils.Response(status, "mission not found"));
             }
 
-            var agent = await this._context.Agents.Include(a => a.location).FirstOrDefaultAsync(agent => agent.id == mission.agentId);
-            var target = await this._context.Targets.Include(t => t.location).FirstOrDefaultAsync(target => target.id == mission.targetId);
-            var distance = await this._serviceMoving.GetDistance(agent.location, target.location);
+            var agent = await this._context.Agents.Include(a => a.Coordinate).FirstOrDefaultAsync(agent => agent.id == mission.agentId);
+            var target = await this._context.Targets.Include(t => t.coordinate).FirstOrDefaultAsync(target => target.id == mission.targetId);
+            var distance = await this._serviceMoving.GetDistance(agent.Coordinate, target.coordinate);
             if (distance > 200)
             {
+                
                 await this._serviceMission.OfferedMission();
             }
             else
